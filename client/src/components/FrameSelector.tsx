@@ -162,7 +162,7 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
         <div className="flex items-center gap-4">
           <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
             <Button 
-              variant={tool === 'brush' ? 'default' : 'ghost'} 
+              variant={tool === 'brush' ? 'primary' : 'ghost'} 
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={() => setTool('brush')}
@@ -170,7 +170,7 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
               <Paintbrush className="h-4 w-4" />
             </Button>
             <Button 
-              variant={tool === 'eraser' ? 'default' : 'ghost'} 
+              variant={tool === 'eraser' ? 'primary' : 'ghost'} 
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={() => setTool('eraser')}
