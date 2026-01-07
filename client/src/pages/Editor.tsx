@@ -14,10 +14,7 @@ import { useLanguage, LanguageSwitcher } from "@/lib/i18n";
 type Step = "upload" | "extract" | "select" | "result";
 
 interface Selection {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+  mask: string; // Data URL of the mask canvas
 }
 
 export default function Editor() {
@@ -125,30 +122,52 @@ export default function Editor() {
       
       // AI fallback if no selection
       if (!sel) {
-        // Simple "AI" heuristic: assume the object moved slightly from previous or check center
-        // In a real app, this would call a vision API
-        sel = { x: canvas.width / 4, y: canvas.height / 4, w: canvas.width / 2, h: canvas.height / 2 };
+        // Simple "AI" heuristic: assume the object is in the center
+        const img = new Image();
+        img.src = frames[i];
+        await new Promise(r => img.onload = r);
+        
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(img, 0, 0);
+        ctx.restore();
+        continue;
       }
 
       const img = new Image();
       img.src = frames[i];
       await new Promise(r => img.onload = r);
 
-      // Draw only the selected region
-      ctx.drawImage(
-        img, 
-        sel.x, sel.y, sel.w, sel.h, // source
-        sel.x, sel.y, sel.w, sel.h  // destination (same position)
-      );
+      const maskImg = new Image();
+      maskImg.src = sel.mask;
+      await new Promise(r => maskImg.onload = r);
 
-      // Draw frame number
+      // Draw only the selected region using the mask
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      if (tempCtx) {
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        
+        // Draw mask
+        tempCtx.drawImage(maskImg, 0, 0);
+        
+        // Draw frame with mask
+        tempCtx.globalCompositeOperation = "source-in";
+        tempCtx.drawImage(img, 0, 0);
+        
+        // Draw to main canvas
+        ctx.drawImage(tempCanvas, 0, 0);
+      }
+
+      // Draw frame number (estimate position from mask center if possible, or top-left)
       ctx.font = "bold 24px sans-serif";
       ctx.fillStyle = "white";
       ctx.strokeStyle = "black";
       ctx.lineWidth = 3;
       const text = `${i + 1}`;
-      ctx.strokeText(text, sel.x + 10, sel.y + 30);
-      ctx.fillText(text, sel.x + 10, sel.y + 30);
+      ctx.strokeText(text, 20, 40 + (i * 30));
+      ctx.fillText(text, 20, 40 + (i * 30));
     }
 
     setResultImage(canvas.toDataURL("image/jpeg", 0.9));
