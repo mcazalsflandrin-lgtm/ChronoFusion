@@ -134,35 +134,12 @@ export default function Editor() {
       img.src = frames[i];
       await new Promise(r => img.onload = r);
 
-      // Draw only the selected region with feathering
-      const tempCanvas = document.createElement("canvas");
-      const tempCtx = tempCanvas.getContext("2d");
-      if (tempCtx) {
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        
-        // Create a mask for feathering
-        const feather = 20; // size of the feathered border
-        tempCtx.fillStyle = "black";
-        tempCtx.fillRect(sel.x, sel.y, sel.w, sel.h);
-        
-        // Apply radial gradient or multiple draws for smoothing if needed, 
-        // but simple globalAlpha and composition works well for borders
-        tempCtx.globalCompositeOperation = "source-in";
-        tempCtx.drawImage(img, 0, 0);
-        
-        // Use a shadow to create a feathered edge effect
-        ctx.save();
-        ctx.shadowBlur = feather;
-        ctx.shadowColor = "black";
-        
-        ctx.drawImage(
-          img, 
-          sel.x, sel.y, sel.w, sel.h, 
-          sel.x, sel.y, sel.w, sel.h
-        );
-        ctx.restore();
-      }
+      // Draw only the selected region
+      ctx.drawImage(
+        img, 
+        sel.x, sel.y, sel.w, sel.h, // source
+        sel.x, sel.y, sel.w, sel.h  // destination (same position)
+      );
 
       // Draw frame number
       ctx.font = "bold 24px sans-serif";
