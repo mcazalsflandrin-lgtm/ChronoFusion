@@ -9,6 +9,7 @@ import { Slider } from "@/components/Slider";
 import { FrameSelector } from "@/components/FrameSelector";
 import { Card } from "@/components/Card";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage, LanguageSwitcher } from "@/lib/i18n";
 
 type Step = "upload" | "extract" | "select" | "result";
 
@@ -20,6 +21,7 @@ interface Selection {
 }
 
 export default function Editor() {
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>("upload");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [interval, setInterval] = useState([0.5]);
@@ -132,6 +134,15 @@ export default function Editor() {
         sel.x, sel.y, sel.w, sel.h, // source
         sel.x, sel.y, sel.w, sel.h  // destination (same position)
       );
+
+      // Draw frame number
+      ctx.font = "bold 24px sans-serif";
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 3;
+      const text = `${i + 1}`;
+      ctx.strokeText(text, sel.x + 10, sel.y + 30);
+      ctx.fillText(text, sel.x + 10, sel.y + 30);
     }
 
     setResultImage(canvas.toDataURL("image/jpeg", 0.9));
@@ -156,17 +167,20 @@ export default function Editor() {
             <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold tracking-tight">Chronophoto Editor</h1>
+            <h1 className="text-xl font-bold tracking-tight">{t("editor.title")}</h1>
           </div>
           
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
-            <span className={step === 'upload' ? 'text-primary font-medium' : ''}>Upload</span>
-            <span className="opacity-30">/</span>
-            <span className={step === 'extract' ? 'text-primary font-medium' : ''}>Extract</span>
-            <span className="opacity-30">/</span>
-            <span className={step === 'select' ? 'text-primary font-medium' : ''}>Select</span>
-            <span className="opacity-30">/</span>
-            <span className={step === 'result' ? 'text-primary font-medium' : ''}>Result</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
+              <span className={step === 'upload' ? 'text-primary font-medium' : ''}>{t("editor.step.upload")}</span>
+              <span className="opacity-30">/</span>
+              <span className={step === 'extract' ? 'text-primary font-medium' : ''}>{t("editor.step.extract")}</span>
+              <span className="opacity-30">/</span>
+              <span className={step === 'select' ? 'text-primary font-medium' : ''}>{t("editor.step.select")}</span>
+              <span className="opacity-30">/</span>
+              <span className={step === 'result' ? 'text-primary font-medium' : ''}>{t("editor.step.result")}</span>
+            </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -201,14 +215,14 @@ export default function Editor() {
                 <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
                   <Sliders className="w-8 h-8" />
                 </div>
-                <h2 className="text-3xl font-bold">Extraction Settings</h2>
-                <p className="text-muted-foreground">Adjust how frequently frames are captured from your video.</p>
+                <h2 className="text-3xl font-bold">{t("editor.extract.title")}</h2>
+                <p className="text-muted-foreground">{t("editor.extract.desc")}</p>
               </div>
 
               <Card className="p-8 bg-white/5 border-white/10">
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
-                    <label className="font-medium text-lg">Interval</label>
+                    <label className="font-medium text-lg">{t("editor.extract.interval")}</label>
                     <span className="bg-primary/20 text-primary px-3 py-1 rounded-md font-mono text-sm">
                       {interval[0]}s
                     </span>
@@ -221,14 +235,14 @@ export default function Editor() {
                     onValueChange={setInterval}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>More frames (0.1s)</span>
-                    <span>Fewer frames (2.0s)</span>
+                    <span>{t("editor.extract.more")} (0.1s)</span>
+                    <span>{t("editor.extract.fewer")} (2.0s)</span>
                   </div>
                 </div>
               </Card>
 
               <Button size="lg" onClick={extractFrames} isLoading={isProcessing} className="w-full">
-                Start Extraction
+                {t("editor.extract.button")}
                 <Play className="w-4 h-4 ml-2 fill-current" />
               </Button>
             </motion.div>
@@ -252,7 +266,7 @@ export default function Editor() {
               {isProcessing && (
                 <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                  <p className="text-xl font-medium animate-pulse">Merging frames...</p>
+                  <p className="text-xl font-medium animate-pulse">{t("editor.processing")}</p>
                 </div>
               )}
             </motion.div>
@@ -267,8 +281,8 @@ export default function Editor() {
               className="w-full max-w-4xl text-center space-y-8"
             >
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-glow">It's Ready!</h2>
-                <p className="text-muted-foreground">Your chronophotography masterpiece has been generated.</p>
+                <h2 className="text-3xl font-bold text-glow">{t("editor.result.title")}</h2>
+                <p className="text-muted-foreground">{t("editor.result.desc")}</p>
               </div>
 
               <Card className="p-2 border-primary/20 bg-black/40 overflow-hidden shadow-2xl shadow-primary/10">
@@ -286,10 +300,10 @@ export default function Editor() {
                   setFrames([]);
                   setResultImage(null);
                 }}>
-                  Start Over
+                  {t("editor.result.startover")}
                 </Button>
                 <Button size="lg" onClick={downloadResult}>
-                  Download Image
+                  {t("editor.result.download")}
                   <Download className="w-4 h-4 ml-2" />
                 </Button>
               </div>

@@ -1,14 +1,16 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Upload, FileVideo, X } from "lucide-react";
+import { Upload, FileVideo, X, ShieldCheck } from "lucide-react";
 import { Button } from "./Button";
 import { Card } from "./Card";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/lib/i18n";
 
 interface VideoUploaderProps {
   onVideoSelected: (file: File) => void;
 }
 
 export function VideoUploader({ onVideoSelected }: VideoUploaderProps) {
+  const { t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,10 +101,14 @@ export function VideoUploader({ onVideoSelected }: VideoUploaderProps) {
       `}>
         <Upload className="w-10 h-10" />
       </div>
-      <h3 className="text-2xl font-bold mb-2">Upload Video</h3>
+      <h3 className="text-2xl font-bold mb-2">{t("uploader.title")}</h3>
       <p className="text-muted-foreground max-w-sm">
-        Drag and drop your video file here, or click to browse.
+        {t("uploader.desc")}
       </p>
+      <div className="pt-4 flex items-center gap-6 text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+        <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> Browser only</span>
+        <span>{t("uploader.limit")}</span>
+      </div>
     </div>
   );
 }
