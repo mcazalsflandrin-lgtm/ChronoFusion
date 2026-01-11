@@ -57,7 +57,7 @@ const translations = {
   fr: {
     "nav.home": "Accueil",
     "nav.editor": "Éditeur",
-    "hero.title": "Maîtrisez le temps avec la",
+    "hero.title": "Crée facilement une chronophotographie",
     "hero.subtitle": "Chronophotographie",
     "hero.description": "Transformez des vidéos ordinaires en superbes compositions de mouvement. Visualisez la trajectoire, la vitesse et la forme dans une seule image statique. Entièrement dans votre navigateur.",
     "hero.cta": "Commencer à créer",
