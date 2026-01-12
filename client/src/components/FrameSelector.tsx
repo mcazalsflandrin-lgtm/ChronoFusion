@@ -18,38 +18,45 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState<"brush" | "eraser">("brush");
   const [brushSize, setBrushSize] = useState(30);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const maskCanvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
+  const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Initialize mask canvas when frame changes
+  // Initialize mask canvas ref once
+  if (maskCanvasRef.current === null) {
+    maskCanvasRef.current = document.createElement("canvas");
+  }
+
+  // Initialize mask canvas when frame changes or image loads
   useEffect(() => {
     const maskCanvas = maskCanvasRef.current;
-    const maskCtx = maskCanvas.getContext("2d");
     const img = imageRef.current;
+    if (!maskCanvas || !img || !isImageLoaded) return;
 
-    if (img && maskCtx) {
-      if (maskCanvas.width !== img.naturalWidth || maskCanvas.height !== img.naturalHeight) {
-        maskCanvas.width = img.naturalWidth;
-        maskCanvas.height = img.naturalHeight;
-      }
-      
-      maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-      
-      const currentSelection = selections[currentIndex];
-      if (currentSelection) {
-        const maskImg = new Image();
-        maskImg.src = currentSelection.mask;
-        maskImg.onload = () => {
-          maskCtx.drawImage(maskImg, 0, 0);
-          draw();
-        };
-      } else {
-        draw();
-      }
+    const maskCtx = maskCanvas.getContext("2d");
+    if (!maskCtx) return;
+
+    if (maskCanvas.width !== img.naturalWidth || maskCanvas.height !== img.naturalHeight) {
+      maskCanvas.width = img.naturalWidth;
+      maskCanvas.height = img.naturalHeight;
     }
-  }, [currentIndex, frames]);
+    
+    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+    
+    const currentSelection = selections[currentIndex];
+    if (currentSelection) {
+      const maskImg = new Image();
+      maskImg.src = currentSelection.mask;
+      maskImg.onload = () => {
+        maskCtx.drawImage(maskImg, 0, 0);
+        draw();
+      };
+    } else {
+      draw();
+    }
+  }, [currentIndex, frames, isImageLoaded]);
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -75,8 +82,12 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     if (img && canvas) {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
-      maskCanvasRef.current.width = img.naturalWidth;
-      maskCanvasRef.current.height = img.naturalHeight;
+      const maskCanvas = maskCanvasRef.current;
+      if (maskCanvas) {
+        maskCanvas.width = img.naturalWidth;
+        maskCanvas.height = img.naturalHeight;
+      }
+      setIsImageLoaded(true);
       draw();
     }
   };
@@ -113,7 +124,9 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     if (!isDrawing) return;
     
     const coords = getCanvasCoords(e);
-    const maskCtx = maskCanvasRef.current.getContext("2d");
+    const maskCanvas = maskCanvasRef.current;
+    if (!maskCanvas) return;
+    const maskCtx = maskCanvas.getContext("2d");
     if (!maskCtx) return;
 
     maskCtx.lineJoin = "round";
@@ -137,8 +150,9 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
   };
 
   const stopDrawing = () => {
-    if (isDrawing) {
-      onSelectionChange(currentIndex, { mask: maskCanvasRef.current.toDataURL() });
+    const maskCanvas = maskCanvasRef.current;
+    if (isDrawing && maskCanvas) {
+      onSelectionChange(currentIndex, { mask: maskCanvas.toDataURL() });
     }
     setIsDrawing(false);
   };
