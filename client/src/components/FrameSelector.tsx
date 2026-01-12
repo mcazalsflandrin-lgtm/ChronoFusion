@@ -48,8 +48,10 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     if (currentSelection && currentSelection.mask) {
       const maskImg = new Image();
       maskImg.onload = () => {
-        maskCtx.drawImage(maskImg, 0, 0);
-        draw();
+        if (maskImg.width > 0 && maskImg.height > 0) {
+          maskCtx.drawImage(maskImg, 0, 0);
+          draw();
+        }
       };
       maskImg.src = currentSelection.mask;
     } else {
