@@ -24,13 +24,12 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Initialize mask canvas ref once
-  if (maskCanvasRef.current === null) {
-    maskCanvasRef.current = document.createElement("canvas");
-  }
-
   // Initialize mask canvas when frame changes or image loads
   useEffect(() => {
+    if (!maskCanvasRef.current) {
+      maskCanvasRef.current = document.createElement("canvas");
+    }
+    
     const maskCanvas = maskCanvasRef.current;
     const img = imageRef.current;
     if (!maskCanvas || !img || !isImageLoaded) return;
@@ -46,17 +45,17 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
     
     const currentSelection = selections[currentIndex];
-    if (currentSelection) {
+    if (currentSelection && currentSelection.mask) {
       const maskImg = new Image();
-      maskImg.src = currentSelection.mask;
       maskImg.onload = () => {
         maskCtx.drawImage(maskImg, 0, 0);
         draw();
       };
+      maskImg.src = currentSelection.mask;
     } else {
       draw();
     }
-  }, [currentIndex, frames, isImageLoaded]);
+  }, [currentIndex, frames, isImageLoaded, selections]);
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -70,8 +69,6 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     // Draw mask overlay
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = "rgba(124, 58, 237, 1)";
-    
-    // Use the mask canvas to draw the selected area
     ctx.drawImage(maskCanvas, 0, 0);
     ctx.globalAlpha = 1.0;
   };
@@ -82,11 +79,10 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     if (img && canvas) {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
-      const maskCanvas = maskCanvasRef.current;
-      if (maskCanvas) {
-        maskCanvas.width = img.naturalWidth;
-        maskCanvas.height = img.naturalHeight;
-      }
+      const maskCanvas = maskCanvasRef.current || document.createElement("canvas");
+      maskCanvas.width = img.naturalWidth;
+      maskCanvas.height = img.naturalHeight;
+      maskCanvasRef.current = maskCanvas;
       setIsImageLoaded(true);
       draw();
     }
@@ -142,7 +138,6 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     }
 
     maskCtx.beginPath();
-    // For simpler brush, we just draw a point/circle
     maskCtx.arc(coords.x, coords.y, brushSize / 2, 0, Math.PI * 2);
     maskCtx.fill();
     
