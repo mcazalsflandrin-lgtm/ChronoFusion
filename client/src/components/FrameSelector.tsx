@@ -24,12 +24,29 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  // Initialize mask canvas ref once
+  if (maskCanvasRef.current === null) {
+    maskCanvasRef.current = document.createElement("canvas");
+  }
+
+  const draw = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    const maskCanvas = maskCanvasRef.current;
+    
+    if (!canvas || !ctx || !maskCanvas) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw mask overlay
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "rgba(124, 58, 237, 1)";
+    ctx.drawImage(maskCanvas, 0, 0);
+    ctx.globalAlpha = 1.0;
+  };
+
   // Initialize mask canvas when frame changes or image loads
   useEffect(() => {
-    if (!maskCanvasRef.current) {
-      maskCanvasRef.current = document.createElement("canvas");
-    }
-    
     const maskCanvas = maskCanvasRef.current;
     const img = imageRef.current;
     if (!maskCanvas || !img || !isImageLoaded) return;
@@ -57,23 +74,7 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     } else {
       draw();
     }
-  }, [currentIndex, frames, isImageLoaded, selections]);
-
-  const draw = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    const maskCanvas = maskCanvasRef.current;
-    
-    if (!canvas || !ctx || !maskCanvas) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw mask overlay
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = "rgba(124, 58, 237, 1)";
-    ctx.drawImage(maskCanvas, 0, 0);
-    ctx.globalAlpha = 1.0;
-  };
+  }, [currentIndex, isImageLoaded, selections]); // Reduced dependencies
 
   const handleImageLoad = () => {
     const img = imageRef.current;
@@ -81,12 +82,13 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     if (img && canvas) {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
-      const maskCanvas = maskCanvasRef.current || document.createElement("canvas");
-      maskCanvas.width = img.naturalWidth;
-      maskCanvas.height = img.naturalHeight;
-      maskCanvasRef.current = maskCanvas;
+      const maskCanvas = maskCanvasRef.current;
+      if (maskCanvas) {
+        maskCanvas.width = img.naturalWidth;
+        maskCanvas.height = img.naturalHeight;
+      }
       setIsImageLoaded(true);
-      draw();
+      // Let the useEffect handle the draw() call to ensure consistency
     }
   };
 
