@@ -120,17 +120,8 @@ export default function Editor() {
     for (let i = 1; i < frames.length; i++) {
       let sel = selections[i];
       
-      // AI fallback if no selection
-      if (!sel) {
-        // Simple "AI" heuristic: assume the object is in the center
-        const img = new Image();
-        img.src = frames[i];
-        await new Promise(r => img.onload = r);
-        
-        ctx.save();
-        ctx.globalAlpha = 0.5;
-        ctx.drawImage(img, 0, 0);
-        ctx.restore();
+      // Skip frames with no selection
+      if (!sel || !sel.mask) {
         continue;
       }
 
