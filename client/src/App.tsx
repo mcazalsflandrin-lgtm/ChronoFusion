@@ -11,8 +11,7 @@ import { LanguageProvider } from "@/lib/i18n";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/editor" component={Editor} />
+      <Route path="/" component={Editor} />
       <Route component={NotFound} />
     </Switch>
   );

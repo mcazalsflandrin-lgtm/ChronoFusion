@@ -203,8 +203,17 @@ export default function Editor() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-xl"
+              className="w-full max-w-xl text-center space-y-8"
             >
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-6xl font-display font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/50">
+                  {t("hero.title")} <br />
+                  <span className="text-primary text-glow">{t("hero.subtitle")}</span>
+                </h1>
+                <p className="text-xl text-muted-foreground leading-relaxed">
+                  {t("hero.description")}
+                </p>
+              </div>
               <VideoUploader onVideoSelected={handleVideoSelected} />
             </motion.div>
           )}
