@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "./Button";
 import { ChevronLeft, ChevronRight, Check, Eraser, Paintbrush } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface Selection {
   mask: string;
