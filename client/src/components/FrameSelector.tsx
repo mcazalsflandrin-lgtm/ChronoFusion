@@ -14,10 +14,11 @@ interface FrameSelectorProps {
 }
 
 export function FrameSelector({ frames, selections, onSelectionChange, onComplete }: FrameSelectorProps) {
+  const { t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState<"brush" | "eraser">("brush");
-  const [brushSize, setBrushSize] = useState(30);
+  const [brushSize, setBrushSize] = useState(50);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -169,8 +170,11 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
+      <div className="text-center space-y-2 mb-2">
+        <p className="text-primary font-medium">{t("editor.select.instructions")}</p>
+      </div>
       <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <span>Frame {currentIndex + 1} of {frames.length}</span>
+        <span>{t("editor.select.frame")} {currentIndex + 1} {t("editor.select.of")} {frames.length}</span>
         <div className="flex items-center gap-4">
           <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
             <Button 
@@ -229,27 +233,27 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
           disabled={currentIndex === 0}
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Previous
+          {t("editor.select.previous")}
         </Button>
         
         <div className="flex gap-2">
            {selections[currentIndex] ? (
              <span className="text-primary flex items-center text-sm font-medium animate-in fade-in">
-               <Check className="w-4 h-4 mr-1" /> Painted
+               <Check className="w-4 h-4 mr-1" /> {t("editor.select.painted")}
              </span>
            ) : (
-             <span className="text-muted-foreground text-sm italic">No selection</span>
+             <span className="text-muted-foreground text-sm italic">{t("editor.select.none")}</span>
            )}
         </div>
 
         {currentIndex === frames.length - 1 ? (
           <Button onClick={onComplete} className="bg-primary text-primary-foreground">
-            Finish Selection
+            {t("editor.select.finish")}
             <Check className="w-4 h-4 ml-2" />
           </Button>
         ) : (
           <Button onClick={nextFrame} variant="secondary">
-            Next Frame
+            {t("editor.select.next")}
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         )}
