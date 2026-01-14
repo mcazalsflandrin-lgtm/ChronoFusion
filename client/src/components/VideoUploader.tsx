@@ -93,7 +93,6 @@ export function VideoUploader({ onVideoSelected }: VideoUploaderProps) {
         ref={fileInputRef}
         onChange={onInputArray}
         accept="video/*"
-        capture="environment"
         className="hidden"
       />
       <div className={`
