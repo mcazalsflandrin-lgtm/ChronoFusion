@@ -177,33 +177,11 @@ export default function Editor() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-background/50 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="text-xl font-bold tracking-tight">{t("editor.title")}</h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
-              <span className={step === 'upload' ? 'text-primary font-medium' : ''}>{t("editor.step.upload")}</span>
-              <span className="opacity-30">/</span>
-              <span className={step === 'extract' ? 'text-primary font-medium' : ''}>{t("editor.step.extract")}</span>
-              <span className="opacity-30">/</span>
-              <span className={step === 'select' ? 'text-primary font-medium' : ''}>{t("editor.step.select")}</span>
-              <span className="opacity-30">/</span>
-              <span className={step === 'result' ? 'text-primary font-medium' : ''}>{t("editor.step.result")}</span>
-            </div>
-            <LanguageSwitcher />
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="flex-1 container max-w-7xl mx-auto p-6 md:p-12 flex flex-col items-center justify-center min-h-[calc(100vh-64px)]">
+      <main className="flex-1 container max-w-7xl mx-auto p-6 md:p-12 flex flex-col items-center justify-center min-h-screen">
+        <div className="fixed top-6 right-6 z-50">
+          <LanguageSwitcher />
+        </div>
         <AnimatePresence mode="wait">
           
           {/* STEP 1: UPLOAD */}
