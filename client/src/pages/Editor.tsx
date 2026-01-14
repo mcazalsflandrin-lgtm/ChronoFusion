@@ -150,15 +150,6 @@ export default function Editor() {
         // Draw to main canvas
         ctx.drawImage(tempCanvas, 0, 0);
       }
-
-      // Draw frame number (estimate position from mask center if possible, or top-left)
-      ctx.font = "bold 24px sans-serif";
-      ctx.fillStyle = "white";
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 3;
-      const text = `${i + 1}`;
-      ctx.strokeText(text, 20, 40 + (i * 30));
-      ctx.fillText(text, 20, 40 + (i * 30));
     }
 
     setResultImage(canvas.toDataURL("image/jpeg", 0.9));
