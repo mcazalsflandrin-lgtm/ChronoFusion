@@ -43,10 +43,19 @@ export default function Editor() {
     setIsProcessing(true);
     const video = videoRef.current;
     
+    // Add playsinline and muted for mobile compatibility
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.muted = true;
+    
     // Wait for metadata to ensure duration is known
     if (video.readyState < 2) {
       await new Promise(resolve => {
-        video.onloadedmetadata = resolve;
+        const handleMetadata = () => {
+          video.removeEventListener("loadedmetadata", handleMetadata);
+          resolve(null);
+        };
+        video.addEventListener("loadedmetadata", handleMetadata);
       });
     }
 
@@ -56,8 +65,9 @@ export default function Editor() {
     const ctx = canvas.getContext("2d");
     const extractedFrames: string[] = [];
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Ensure video dimensions are available
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
 
     if (!ctx) {
       toast({ title: "Error", description: "Could not initialize canvas", variant: "destructive" });
