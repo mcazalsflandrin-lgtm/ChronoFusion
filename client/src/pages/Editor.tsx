@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Play, Layers, Download, CheckCircle2, Sliders } from "lucide-react";
+import { ArrowLeft, Play, Layers, Download, CheckCircle2, Sliders, Ruler } from "lucide-react";
 
 import { Button } from "@/components/Button";
 import { VideoUploader } from "@/components/VideoUploader";
 import { Slider } from "@/components/Slider";
 import { FrameSelector } from "@/components/FrameSelector";
+import { MeasurementTool } from "@/components/MeasurementTool";
 import { Card } from "@/components/Card";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, LanguageSwitcher } from "@/lib/i18n";
 
-type Step = "upload" | "extract" | "select" | "result";
+type Step = "upload" | "extract" | "select" | "result" | "measure";
 
 interface Selection {
   mask: string; // Data URL of the mask canvas
@@ -306,11 +307,31 @@ export default function Editor() {
                 }}>
                   {t("editor.result.startover")}
                 </Button>
+                <Button variant="secondary" onClick={() => setStep("measure")}>
+                  {t("editor.result.measure")}
+                  <Ruler className="w-4 h-4 ml-2" />
+                </Button>
                 <Button size="lg" onClick={downloadResult}>
                   {t("editor.result.download")}
                   <Download className="w-4 h-4 ml-2" />
                 </Button>
               </div>
+            </motion.div>
+          )}
+
+          {/* STEP 5: MEASURE */}
+          {step === "measure" && resultImage && (
+            <motion.div
+              key="measure"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="w-full"
+            >
+              <MeasurementTool 
+                image={resultImage} 
+                onBack={() => setStep("result")} 
+              />
             </motion.div>
           )}
 
