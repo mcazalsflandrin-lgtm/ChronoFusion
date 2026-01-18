@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "./Button";
-import { Ruler, Trash2, Check } from "lucide-react";
+import { Ruler, Trash2, Check, Download } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -133,6 +133,66 @@ export function MeasurementTool({ image, onBack }: MeasurementToolProps) {
     draw();
   }, [scaleLine, currentLine, measurements]);
 
+  const handleBack = () => {
+    onBack();
+  };
+
+  const downloadWithMeasurements = () => {
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    if (!canvas || !image) return;
+
+    const exportCanvas = document.createElement("canvas");
+    const exportCtx = exportCanvas.getContext("2d");
+    if (!exportCtx) return;
+
+    exportCanvas.width = image.naturalWidth;
+    exportCanvas.height = image.naturalHeight;
+
+    // Draw base image
+    exportCtx.drawImage(image, 0, 0);
+    
+    // Draw measurements (reuse the draw logic onto exportCtx)
+    exportCtx.lineWidth = 3;
+    exportCtx.lineCap = "round";
+
+    // Re-draw logic specifically for export
+    if (scaleLine) {
+      exportCtx.strokeStyle = "#7c3aed";
+      exportCtx.beginPath();
+      exportCtx.moveTo(scaleLine.p1.x, scaleLine.p1.y);
+      exportCtx.lineTo(scaleLine.p2.x, scaleLine.p2.y);
+      exportCtx.stroke();
+      drawEndCap(exportCtx, scaleLine.p1, scaleLine.p2);
+    }
+
+    measurements.forEach((m) => {
+      exportCtx.strokeStyle = "#10b981";
+      exportCtx.beginPath();
+      exportCtx.moveTo(m.p1.x, m.p1.y);
+      exportCtx.lineTo(m.p2.x, m.p2.y);
+      exportCtx.stroke();
+      drawEndCap(exportCtx, m.p1, m.p2);
+
+      if (m.length) {
+        exportCtx.font = "bold 24px sans-serif";
+        exportCtx.fillStyle = "white";
+        exportCtx.strokeStyle = "black";
+        exportCtx.lineWidth = 4;
+        const text = `${m.length.toFixed(2)} ${m.unit}`;
+        const midX = (m.p1.x + m.p2.x) / 2;
+        const midY = (m.p1.y + m.p2.y) / 2;
+        exportCtx.strokeText(text, midX + 10, midY);
+        exportCtx.fillText(text, midX + 10, midY);
+      }
+    });
+
+    const link = document.createElement("a");
+    link.href = exportCanvas.toDataURL("image/jpeg", 0.9);
+    link.download = `chronophoto-measured-${Date.now()}.jpg`;
+    link.click();
+  };
+
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     const coords = getCanvasCoords(e);
     setIsDrawing(true);
@@ -257,6 +317,10 @@ export function MeasurementTool({ image, onBack }: MeasurementToolProps) {
       <div className="flex justify-between items-center">
         <Button variant="outline" onClick={onBack}>
           {t("measure.back")}
+        </Button>
+        <Button onClick={downloadWithMeasurements} className="bg-primary text-primary-foreground">
+          <Download className="w-4 h-4 mr-2" />
+          {t("measure.download")}
         </Button>
       </div>
     </div>
