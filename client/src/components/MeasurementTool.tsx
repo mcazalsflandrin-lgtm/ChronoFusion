@@ -104,10 +104,10 @@ export function MeasurementTool({ image, onBack }: MeasurementToolProps) {
 
       // Label
       if (m.length) {
-        ctx.font = "bold 16px sans-serif";
+        ctx.font = "bold 24px sans-serif";
         ctx.fillStyle = "white";
         ctx.strokeStyle = "black";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         const text = `${m.length.toFixed(2)} ${m.unit}`;
         const midX = (m.p1.x + m.p2.x) / 2;
         const midY = (m.p1.y + m.p2.y) / 2;
