@@ -80,11 +80,19 @@ export default function Editor() {
       for (let time = 0; time < duration; time += stepTime) {
         // Seek
         video.currentTime = time;
-        await new Promise(r => video.onseeked = r);
         
-        // Draw
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        extractedFrames.push(canvas.toDataURL("image/jpeg", 0.8));
+        await new Promise((resolve) => {
+          const onSeeked = () => {
+            video.removeEventListener("seeked", onSeeked);
+            // Wait for a frame to be ready on high-res/high-fps devices
+            requestAnimationFrame(() => {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              extractedFrames.push(canvas.toDataURL("image/jpeg", 0.8));
+              resolve(null);
+            });
+          };
+          video.addEventListener("seeked", onSeeked);
+        });
       }
       
       setFrames(extractedFrames);

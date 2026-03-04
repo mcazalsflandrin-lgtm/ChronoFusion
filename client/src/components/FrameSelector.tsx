@@ -103,8 +103,15 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     
     let clientX, clientY;
     if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
+      if (e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+        clientX = (e as any).changedTouches[0].clientX;
+        clientY = (e as any).changedTouches[0].clientY;
+      } else {
+        return { x: 0, y: 0 };
+      }
     } else {
       clientX = e.clientX;
       clientY = e.clientY;
@@ -116,13 +123,19 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     };
   };
 
+  const lastPointRef = useRef<{x: number, y: number} | null>(null);
+
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    if (e.cancelable) e.preventDefault();
     setIsDrawing(true);
+    const coords = getCanvasCoords(e);
+    lastPointRef.current = coords;
     continueDrawing(e);
   };
 
   const continueDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrawing) return;
+    if (e.cancelable) e.preventDefault();
     
     const coords = getCanvasCoords(e);
     const maskCanvas = maskCanvasRef.current;
@@ -143,18 +156,26 @@ export function FrameSelector({ frames, selections, onSelectionChange, onComplet
     }
 
     maskCtx.beginPath();
-    maskCtx.arc(coords.x, coords.y, brushSize / 2, 0, Math.PI * 2);
-    maskCtx.fill();
+    if (lastPointRef.current) {
+      maskCtx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
+    } else {
+      maskCtx.moveTo(coords.x, coords.y);
+    }
+    maskCtx.lineTo(coords.x, coords.y);
+    maskCtx.stroke();
     
+    lastPointRef.current = coords;
     draw();
   };
 
-  const stopDrawing = () => {
+  const stopDrawing = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e && e.cancelable) e.preventDefault();
     const maskCanvas = maskCanvasRef.current;
     if (isDrawing && maskCanvas && maskCanvas.width > 0 && maskCanvas.height > 0) {
       onSelectionChange(currentIndex, { mask: maskCanvas.toDataURL() });
     }
     setIsDrawing(false);
+    lastPointRef.current = null;
   };
 
   const nextFrame = () => {
