@@ -66,9 +66,23 @@ export default function Editor() {
     const ctx = canvas.getContext("2d");
     const extractedFrames: string[] = [];
 
-    // Ensure video dimensions are available
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    // Limit resolution for performance (max 1280px width/height)
+    const MAX_DIM = 1280;
+    let width = video.videoWidth || 1280;
+    let height = video.videoHeight || 720;
+
+    if (width > MAX_DIM || height > MAX_DIM) {
+      if (width > height) {
+        height = Math.round((height * MAX_DIM) / width);
+        width = MAX_DIM;
+      } else {
+        width = Math.round((width * MAX_DIM) / height);
+        height = MAX_DIM;
+      }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
 
     if (!ctx) {
       toast({ title: "Error", description: "Could not initialize canvas", variant: "destructive" });
@@ -87,7 +101,8 @@ export default function Editor() {
             // Wait for a frame to be ready on high-res/high-fps devices
             requestAnimationFrame(() => {
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              extractedFrames.push(canvas.toDataURL("image/jpeg", 0.8));
+              // Lower quality to 0.6 for faster processing and lower memory usage
+              extractedFrames.push(canvas.toDataURL("image/jpeg", 0.6));
               resolve(null);
             });
           };
